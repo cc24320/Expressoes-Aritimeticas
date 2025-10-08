@@ -1,5 +1,4 @@
 # Expressoes-Aritimeticas
----
 
 ### **Classe `AvaliacaoExpressoesAritmeticas`**
 
