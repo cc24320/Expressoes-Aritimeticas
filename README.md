@@ -1,5 +1,7 @@
 # Expressoes-Aritimeticas
 
+---
+
 ### **Classe `AvaliacaoExpressoesAritmeticas`**
 
 Responsável por avaliar expressões aritméticas usando uma **árvore binária**, dividindo a expressão, montando a árvore, avaliando e exibindo.
