@@ -91,15 +91,13 @@ public class AvaliacaoExpressoesAritmeticas {
         }
     }
 
-    // Etapa 1: Fragmentação
+    // --- Etapa 1: Fragmentação ---
     public static List<No> fragmentar(String expressao) {
-        if (expressao == null) expressao = "";
         expressao = expressao.replaceAll("\\s+", "");
         List<No> vetor = new ArrayList<>();
         StringBuilder numero = new StringBuilder();
 
-        for (int i = 0; i < expressao.length(); i++) {
-            char c = expressao.charAt(i);
+        for (char c : expressao.toCharArray()) {
             if (Character.isDigit(c)) {
                 numero.append(c);
             } else {
@@ -116,36 +114,37 @@ public class AvaliacaoExpressoesAritmeticas {
         return vetor;
     }
 
-    // Etapa 3 e 4: Aglutinação por precedência 
+    // --- Etapa 3 e 4: Aglutinação por precedência ---
     private static void aglutinar(List<No> vetor, String operadores) {
         for (int i = 1; i < vetor.size() - 1; i++) {
             No atual = vetor.get(i);
-            if (atual.ehOperador() && operadores.contains(atual.getValor())) {
+            if (atual.ehOperador() && operadores.contains(atual.valor)) {
                 No esquerda = vetor.get(i - 1);
                 No direita = vetor.get(i + 1);
-                atual.setEsq(esquerda);
-                atual.setDir(direita);
+                atual.esq = esquerda;
+                atual.dir = direita;
+                // Substitui três elementos por um
                 vetor.set(i - 1, atual);
                 vetor.remove(i); // remove operador
                 vetor.remove(i); // remove direita
-                i--;
+                i--; // ajusta índice
             }
         }
     }
 
-    // Etapa 2 e 5: Construção da árvore com subexpressões e eliminação de parênteses 
+    // --- Etapa 2 e 5: Construção da árvore com subexpressões e eliminação de parênteses ---
     public static No construirArvore(List<No> vetor) {
-        while (vetor.stream().anyMatch(n -> "(".equals(n.getValor()))) {
+        while (vetor.stream().anyMatch(n -> "(".equals(n.valor))) {
             int inicio = -1;
             for (int i = 0; i < vetor.size(); i++)
-                if ("(".equals(vetor.get(i).getValor()))
+                if ("(".equals(vetor.get(i).valor))
                     inicio = i;
 
             if (inicio == -1) break;
 
             int fim = -1;
             for (int j = inicio + 1; j < vetor.size(); j++)
-                if (")".equals(vetor.get(j).getValor())) {
+                if (")".equals(vetor.get(j).valor)) {
                     fim = j;
                     break;
                 }
@@ -155,7 +154,7 @@ public class AvaliacaoExpressoesAritmeticas {
             List<No> sub = new ArrayList<>(vetor.subList(inicio + 1, fim));
             No subArvore = construirArvore(sub);
 
-            // Substitui (subArvore) no vetor original
+            // Substitui (subArvore) no vetor
             for (int k = 0; k <= (fim - inicio); k++)
                 vetor.remove(inicio);
             vetor.add(inicio, subArvore);
@@ -169,27 +168,30 @@ public class AvaliacaoExpressoesAritmeticas {
         return vetor.isEmpty() ? null : vetor.get(0);
     }
 
-    // Etapa 6: Avaliação recursiva 
+    // --- Etapa 6: Avaliação ---
     public static double avaliar(No no) {
-        if (no == null) return 0.0;
-        if (!no.ehOperador()) return Double.parseDouble(no.getValor());
-        double esq = avaliar(no.getEsq());
-        double dir = avaliar(no.getDir());
-        return switch (no.getValor()) {
+        if (no == null) return 0;
+        if (!no.ehOperador()) return Double.parseDouble(no.valor);
+
+        double esq = avaliar(no.esq);
+        double dir = avaliar(no.dir);
+
+        return switch (no.valor) {
             case "+" -> esq + dir;
             case "-" -> esq - dir;
             case "*" -> esq * dir;
             case "/" -> esq / dir;
             case "^" -> Math.pow(esq, dir);
-            default -> 0.0;
+            default -> 0;
         };
     }
 
-    // --- Exibir árvore ---
+    // --- Exibir árvore (opcional) ---
     public static void exibirArvore(No no, int nivel) {
         if (no == null) return;
-        exibirArvore(no.getDir(), nivel + 1);
-        System.out.println("    ".repeat(nivel) + no.getValor());
-        exibirArvore(no.getEsq(), nivel + 1);
+        exibirArvore(no.dir, nivel + 1);
+        System.out.println("    ".repeat(nivel) + no.valor);
+        exibirArvore(no.esq, nivel + 1);
     }
+
 }
