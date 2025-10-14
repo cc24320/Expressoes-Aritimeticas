@@ -32,8 +32,62 @@ public class AvaliacaoExpressoesAritmeticas {
 
         @Override
         public String toString() {
-            if (esq == null && dir == null) return valor;
-            return "(" + (esq != null ? esq.toString() : "") + valor + (dir != null ? dir.toString() : "") + ")";
+            String ret = "No com valor \"" + this.valor + "\"";
+
+            if (this.esq != null)
+                ret += ", esquerda = " + this.esq.valor;
+            if (this.dir != null)
+                ret += ", direita = " + this.dir.valor;
+
+            return ret;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+
+            if (obj == null)
+                return false;
+
+            if (this.getClass() != obj.getClass())
+                return false;
+
+            No no = (No) obj;
+
+            if (this.valor == null) {
+                if (no.valor != null)
+                    return false;
+            } else if (!this.valor.equals(no.valor))
+                return false;
+
+            if (this.esq == null) {
+                if (no.esq != null)
+                    return false;
+            } else if (!this.esq.equals(no.esq))
+                return false;
+
+            if (this.dir == null) {
+                if (no.dir != null)
+                    return false;
+            } else if (!this.dir.equals(no.dir))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int ret = 666; // qualquer positivo
+
+            ret = ret * 7 + (this.valor == null ? 0 : this.valor.hashCode());
+            ret = ret * 7 + (this.esq == null ? 0 : this.esq.hashCode());
+            ret = ret * 7 + (this.dir == null ? 0 : this.dir.hashCode());
+
+            if (ret < 0)
+                ret = -ret;
+
+            return ret;
         }
     }
 
