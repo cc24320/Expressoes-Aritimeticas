@@ -124,6 +124,7 @@ public class AvaliacaoExpressoesAritmeticas {
             return topo == 0;
         }
     }
+    
 
     // ======= FRAGMENTAR EXPRESSÃO =======
     public static ListaNos fragmentar(String expr) {
@@ -154,14 +155,52 @@ public class AvaliacaoExpressoesAritmeticas {
 
     // ======= CONSTRUIR ÁRVORE =======
     public static No construirArvore(ListaNos lista) {
-        PilhaNo operandos = new PilhaNo();
-        PilhaString operadores = new PilhaString();
 
+        // ======= VALIDAÇÃO DA EXPRESSÃO =======
+        int balance = 0; // para parênteses
+        String ultimo = ""; // último token
         for (int i = 0; i < lista.size(); i++) {
             String token = lista.get(i);
 
+            // token inválido
+            if (!ehNumero(token) && !ehOperador(token) && !token.equals("(") && !token.equals(")")) {
+                throw new RuntimeException("Token inválido: " + token);
+            }
+
+            // dois operadores seguidos
+            if (ehOperador(token) && ehOperador(ultimo)) {
+                throw new RuntimeException("Dois operadores seguidos: " + ultimo + token);
+            }
+
+            // operador no começo ou no fim
+            if (i == 0 && ehOperador(token)) {
+                throw new RuntimeException("Expressão não pode começar com operador: " + token);
+            }
+            if (i == lista.size() - 1 && ehOperador(token)) {
+                throw new RuntimeException("Expressão não pode terminar com operador: " + token);
+            }
+
+            // parênteses
+            if (token.equals("(")) balance++;
+            if (token.equals(")")) balance--;
+            if (balance < 0) throw new RuntimeException("Parêntese ')' sem correspondente '('");
+
+            ultimo = token;
+        }
+
+        if (balance != 0) throw new RuntimeException("Parênteses não balanceados");
+        // ======= FIM DA VALIDAÇÃO =======
+        PilhaNo operandos = new PilhaNo();
+        PilhaString operadores = new PilhaString();
+        for (int i = 0; i < lista.size(); i++) {
+            String token = lista.get(i);
+
+            if (!ehNumero(token) && !ehOperador(token) && !token.equals("(") && !token.equals(")")) {
+                throw new RuntimeException("Token inválido: " + token);
+            }    
+
             if (ehNumero(token)) {
-                operandos.push(new No(token));
+                operandos.push(new No(token)); 
             } else if (token.equals("(")) {
                 operadores.push(token);
             } else if (token.equals(")")) {
@@ -177,7 +216,8 @@ public class AvaliacaoExpressoesAritmeticas {
                 operadores.pop(); // remove '('
             } else if (ehOperador(token)) {
                 while (!operadores.isEmpty() &&
-                       precedencia(operadores.peek()) >= precedencia(token)) {
+                       ((token.equals("^") && precedencia(operadores.peek()) > precedencia(token)) ||
+                        (!token.equals("^") && precedencia(operadores.peek()) >= precedencia(token)))) {
                     String op = operadores.pop();
                     No dir = operandos.pop();
                     No esq = operandos.pop();
@@ -188,6 +228,7 @@ public class AvaliacaoExpressoesAritmeticas {
                 }
                 operadores.push(token);
             }
+            
         }
 
         while (!operadores.isEmpty()) {
